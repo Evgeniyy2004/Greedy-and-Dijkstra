@@ -11,8 +11,10 @@ public class DijkstraPathFinder
     {
         Dictionary<Point, DijkstraData> track = new Dictionary<Point, DijkstraData>();
         HashSet<Point> notvisited = new HashSet<Point>();
+        var l=targets.ToHashSet();
         track[start] = new DijkstraData { Mark = 0, Previous = null, Length = 0 };
         notvisited.Add(start);
+        int find = 0;
         while (true)
         {
             Point? toOpen = null;
@@ -28,7 +30,7 @@ public class DijkstraPathFinder
 
             if (toOpen == null) yield break;
 
-            if (state.Chests.Contains(toOpen.Value))
+            if (l.Contains(toOpen.Value))
             {
                 Point[] points = new Point[track[toOpen.Value].Length + 1];
                 points[track[toOpen.Value].Length] = toOpen.Value;
@@ -39,7 +41,9 @@ public class DijkstraPathFinder
                     points[track[now.Value].Length] = now.Value;
                     now = track[now.Value].Previous;
                 }
+                find++;
                 yield return new PathWithCost(result, points);
+                if(find==l.Count) break;
             }
 
             for (int i = -1; i <= 1; i++)
