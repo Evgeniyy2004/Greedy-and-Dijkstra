@@ -259,6 +259,7 @@ position
             Assert.AreEqual(costs[position], path.Cost);
             Assert.AreEqual(costs[position], energy - controller.State.Energy);
             CollectionAssert.Contains(state.Chests, position);
+            
             Assert.True(previousCost <= path.Cost);
             previousCost = path.Cost;
             costs.Remove(position);
