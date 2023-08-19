@@ -19,6 +19,7 @@ public class GreedyPathFinder : IPathFinder
 				if (state.Energy < e.Cost) break;
 				result=result.Concat(e.Path.Skip(1)).ToList();
 				state.Position=e.Path.Last();
+				state.Energy-=e.Cost;
 				startOfThis.Remove(state.Position);
 				count++;
 				break;
