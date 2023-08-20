@@ -9,31 +9,38 @@ namespace Greedy;
 
 public class NotGreedyPathFinder : IPathFinder
 {
+	
 	public List<Point> FindPathToCompleteGoal(State state)
 	{
 
-		//var numbers=Enumerable.Range(0,state.Chests.Count+1).ToArray();
-		//int left = -1;
-		//int right = numbers.Count();
-		//var lazyAndGreedy= new GreedyPathFinder();
-		//while (right-left!=1) 
-		//{ 
-		//	var middle=(left+right)/2;
-		//          var curr = new State(state.MazeName, state.InitialEnergy, state.Position, state.CellCost, numbers[middle],state.Chests);
-		//	if (lazyAndGreedy.FindPathToCompleteGoal(curr).Count == 0)
-		//	{
-		//		right = middle;
-		//	}
-		//	else left = middle;
-		//      }
 
-		//return lazyAndGreedy.FindPathToCompleteGoal(new State(state.MazeName, state.InitialEnergy, state.Position, state.CellCost, numbers[left], state.Chests));
-		List<Point[]> all = new List<Point[]>();
-		Point[] start=new Point[state.Chests.Count];
-		MakePermutation(start, state.Chests.ToList(),all,0);
-		var c=all.OrderByDescending(x=>TryToGo(state,x.ToList()).chestscount).First();
-		return TryToGo(state,c.ToList()).points;
-	}
+		//if (state.Chests.Count <=20)
+		//{
+			List<Point[]> all = new List<Point[]>();
+			Point[] start = new Point[state.Chests.Count];
+			MakePermutation(state,start, state.Chests.ToList(), all, 0);
+			var c = all.OrderByDescending(x => x.Count()).First();
+			return TryToGo(state, c.ToList()).points;
+		//}
+
+  //      var numbers = Enumerable.Range(1, state.Chests.Count ).ToArray();
+  //      int left = -1;
+  //      int right = numbers.Count();
+  //      var lazyAndGreedy = new GreedyPathFinder();
+  //      while (right - left != 1)
+  //      {
+  //          var middle = (left + right) / 2;
+  //          var curr = new State(state.MazeName, state.InitialEnergy, state.Position, state.CellCost, numbers[middle], state.Chests);
+  //          if (lazyAndGreedy.FindPathToCompleteGoal(curr).Count == 0)
+  //          {
+  //              right = middle;
+  //          }
+  //          else left = middle;
+  //      }
+		//state.Scores = numbers[left];
+  //      return lazyAndGreedy.FindPathToCompleteGoal(new State(state.MazeName, state.InitialEnergy, state.Position, state.CellCost, numbers[left], state.Chests));
+
+    }
 
 	public static WayAndChests TryToGo(State state, List<Point> way)
 	{
@@ -59,13 +66,14 @@ public class NotGreedyPathFinder : IPathFinder
 		return new WayAndChests(points,chests);
 	}
 
-	public static void MakePermutation(Point[] variant,List<Point>variants, List<Point[]> allways,int position=0)
+	public static void MakePermutation(State state,Point[] variant,List<Point>variants, List<Point[]> allways,int position=0)
 	{
 		if(position==variant.Length)
 		{
 			var curr=new Point[variant.Length];
 			variant.CopyTo(curr,0);
 			allways.Add(curr);
+			return;
 		}
 
 		for(int i=0;i<variant.Length;i++) 
@@ -73,8 +81,29 @@ public class NotGreedyPathFinder : IPathFinder
 			var c = Array.IndexOf(variant, variants[i],0,position);
 			if (c != -1) continue;
 			variant[position] = variants[i];
-			MakePermutation(variant,variants,allways,position+1);
+			//if (position == 0)
+			//{
+			//	var drdre = new DijkstraPathFinder();
+			//	if (drdre.GetPathsByDijkstra(state, state.Position, new List<Point>(1) { variant[position] }) != null)
+			//	MakePermutation(state, variant, variants, allways, position + 1);
+			//}
+			//else
+			//{
+			//             var drdre = new DijkstraPathFinder();
+			//             if (drdre.GetPathsByDijkstra(state, variant[position-1], new List<Point>(1) { variant[position] }) != null)
+			var v = TryToGo(state, variant.Take(position + 1).ToList());
+			if (v.chestscount==position+1) 
+				MakePermutation(state, variant, variants, allways, position + 1);
+			else
+			{
+                var curr = new Point[position+1];
+                variant.Take(position+1).ToArray().CopyTo(curr, 0);
+                allways.Add(curr);
+                return;
+            }
+			//}
 		}
+		return;
 	}
 }
 
@@ -82,7 +111,6 @@ public class WayAndChests
 {
 	public List<Point> points;
 	public int chestscount;
-
 	public WayAndChests(List<Point> points, int chestscount)
     {
         this.points = points;
