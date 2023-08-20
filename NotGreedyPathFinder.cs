@@ -72,7 +72,10 @@ public class NotGreedyPathFinder : IPathFinder
 		{
 			var curr=new Point[variant.Length];
 			variant.CopyTo(curr,0);
-			allways.Add(curr);
+			if(allways.Count>0)
+			allways[0] = curr;
+			else
+				allways.Add(curr);
 			return;
 		}
 
@@ -81,27 +84,23 @@ public class NotGreedyPathFinder : IPathFinder
 			var c = Array.IndexOf(variant, variants[i],0,position);
 			if (c != -1) continue;
 			variant[position] = variants[i];
-			//if (position == 0)
-			//{
-			//	var drdre = new DijkstraPathFinder();
-			//	if (drdre.GetPathsByDijkstra(state, state.Position, new List<Point>(1) { variant[position] }) != null)
-			//	MakePermutation(state, variant, variants, allways, position + 1);
-			//}
-			//else
-			//{
-			//             var drdre = new DijkstraPathFinder();
-			//             if (drdre.GetPathsByDijkstra(state, variant[position-1], new List<Point>(1) { variant[position] }) != null)
 			var v = TryToGo(state, variant.Take(position + 1).ToList());
 			if (v.chestscount==position+1) 
 				MakePermutation(state, variant, variants, allways, position + 1);
 			else
 			{
-                var curr = new Point[position+1];
+                
+				var curr = new Point[position+1];
                 variant.Take(position+1).ToArray().CopyTo(curr, 0);
-                allways.Add(curr);
-                return;
-            }
-			//}
+				if (allways.Count == 0)
+				{
+					allways.Add(curr);
+				}
+				else
+				{
+					if (curr.Count() > allways[0].Count()) allways[0]=curr;
+				}
+			}
 		}
 		return;
 	}
