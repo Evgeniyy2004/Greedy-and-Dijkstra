@@ -9,21 +9,14 @@ public class NotGreedyPathFinder : IPathFinder
 {
 	
 	public List<Point> FindPathToCompleteGoal(State state)
-	{
-
-
-		
+	{	
 			List<Point[]> all = new List<Point[]>();
 			Point[] start = new Point[state.Chests.Count];
 			MakePermutation(state, (start, 0), state.Chests.ToList(), all, 0);
-			var max = all.Max(x => x.Length);
-			var c = all.Where(v => v.Length == max);
-			foreach (var e in c)
-			{
-				var t = TryToGo(state, e);
-				if (t.chestscount == e.Length) return t.points;
-			}
-			return new List<Point>();		
+			var c = all.OrderByDescending(v => v.Length ).First();
+			var t = TryToGo(state, c);
+			return t.points;
+				
     }
 
 	public static WayAndChests TryToGo(State state, IEnumerable<Point> way)
@@ -53,11 +46,13 @@ public class NotGreedyPathFinder : IPathFinder
 
 	public static void MakePermutation(State state,(Point[],int) variant,List<Point>variants, List<Point[]> allways,int position=0)
 	{
+		if (allways.Count != 0 && allways[0].Length == variants.Count) return;
 		if(position==variants.Count)
 		{
 			var curr=new Point[variant.Item1.Length];
 			variant.Item1.CopyTo(curr,0);
-		    allways.Add(curr);
+			if (allways.Count == 0) allways.Add(curr);
+			else allways[0] = curr ;
 			return;
 		}
 
@@ -74,7 +69,6 @@ public class NotGreedyPathFinder : IPathFinder
 			}
 			else
 			{ 
-
 				int currcost;
 				if (position == 0) currcost = new DijkstraPathFinder().GetPathsByDijkstra(state, state.Position, new List<Point>(1) { variant.Item1[position] }).First().Cost;
 				else currcost = new DijkstraPathFinder().GetPathsByDijkstra(state, variant.Item1[position - 1], new List<Point>(1) { variant.Item1[position] }).First().Cost;
@@ -91,27 +85,27 @@ public class NotGreedyPathFinder : IPathFinder
 		return;
 	}
 
-    public List<Point> GreedyStrategy(State state)
-    {
-        var startOfThis = state.Chests;
-        var maker = new DijkstraPathFinder();
-        List<Point> result = new List<Point>();
-        int count = 0;
-        for (int j = 0; j < state.Chests.Count; j++)
-        {
-            foreach (var e in maker.GetPathsByDijkstra(state, state.Position, startOfThis))
-            {
-                if (state.Energy < e.Cost) break;
-                result = result.Concat(e.Path.Skip(1)).ToList();
-                state.Position = e.Path.Last();
-                state.Energy -= e.Cost;
-                startOfThis.Remove(state.Position);
-                count++;
-                break;
-            }
-        }
-        return result;
-    }
+    //public List<Point> GreedyStrategy(State state)
+    //{
+    //    var startOfThis = state.Chests.ToHashSet();
+    //    var maker = new DijkstraPathFinder();
+    //    List<Point> result = new List<Point>();
+    //    int count = 0;
+    //    for (int j = 0; j < state.Chests.Count; j++)
+    //    {
+    //        foreach (var e in maker.GetPathsByDijkstra(state, state.Position, startOfThis))
+    //        {
+    //            if (state.Energy < e.Cost) break;
+    //            result = result.Concat(e.Path.Skip(1)).ToList();
+    //            state.Position = e.Path.Last();
+    //            state.Energy -= e.Cost;
+    //            startOfThis.Remove(state.Position);
+    //            count++;
+    //            break;
+    //        }
+    //    }
+    //    return result;
+    //}
 }
 
 
